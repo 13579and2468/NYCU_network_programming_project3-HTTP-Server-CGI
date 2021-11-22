@@ -65,7 +65,13 @@ private:
     auto tokens = split(line.substr(0,line.length()-1));
     setenv("REQUEST_METHOD",tokens[0].c_str(),1);
     setenv("REQUEST_URI",tokens[1].c_str(),1);
-    setenv("QUERY_STRING",tokens[1].substr(tokens[1].find("?")+1).c_str(),1);
+    if(tokens[1].find("?")==string::npos)
+    {
+        setenv("QUERY_STRING","",1);
+    }else
+    {
+        setenv("QUERY_STRING",tokens[1].substr(tokens[1].find("?")+1).c_str(),1);
+    }
     setenv("SERVER_PROTOCOL",tokens[2].c_str(),1);
     
     while(getline(ios,line))
@@ -89,7 +95,7 @@ private:
         auto self(shared_from_this());
         iostream ios(&sockiobuf);
         mysetenv(ios);
-        boost::asio::async_write(socket_, boost::asio::buffer("HTTP/1.1 200 OK\r\n"),
+        boost::asio::async_write(socket_, boost::asio::buffer("HTTP/1.1 200 OK\r\n",17),
             [this, self](boost::system::error_code ec, std::size_t /*bytes_transferred*/)
             {
                 if (!ec)
