@@ -102,8 +102,13 @@ private:
                 {
                     string target = "."+string(getenv("REQUEST_URI"));
                     target = target.substr(0,target.find("?"));
-                    bp::spawn(target.c_str(), fd.bind(0, socket_.native_handle()), fd.bind(1, socket_.native_handle()));
-                    exit(0);
+                    int sockfd = socket_.native_handle();
+                    dup2(sockfd,0);
+                    dup2(sockfd,1);
+                    execlp(target.c_str(),target.c_str(),NULL);
+                    //bp::spawn(target.c_str(), fd.bind(0, socket_.native_handle()), fd.bind(1, socket_.native_handle()));
+                    cerr<<"exec fail : "<<target;
+                    exit(-1);
                 }
             });
     }else
